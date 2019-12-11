@@ -4,7 +4,6 @@
  */
 package com.kwxyzk.context;
 
-import com.kwxyzk.message.Message;
 import lombok.Data;
 
 /**
@@ -15,11 +14,10 @@ import lombok.Data;
 @Data
 public class WorkContext {
 
-    private KSocket socket;
-
-    private Message readMessage;
-
-    private Message writeMessage;
+    /**
+     * 单个任务处理的io连接数
+     */
+    public static int socketProcessNum = 10;
 
 
 }

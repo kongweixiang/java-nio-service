@@ -5,7 +5,9 @@
 package com.kwxyzk.reactor;
 
 import com.kwxyzk.context.KSocket;
+import com.kwxyzk.context.WorkContext;
 
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.concurrent.BlockingDeque;
@@ -46,18 +48,21 @@ public class IOFuture<V> extends FutureTask<V> {
             this.cancel(false);
             return false;
         }
-        if (count.incrementAndGet() <= 10) {
+        if (count.incrementAndGet() <= WorkContext.socketProcessNum) {
             try {
                 SelectionKey register = t.getSocketChannel().register(this.selector, SelectionKey.OP_READ);
                 register.attach(t);
                 taskPointer.put(this);
-            } catch (Exception e) {
+            }catch (ClosedChannelException e){
                 e.printStackTrace();
+            }catch (Exception e) {
+                e.printStackTrace();
+                count.decrementAndGet();
+                return false;
             }
             return true;
         } else {
-            this.cancel(false);
-//            this.socketProcessor.interrupt();
+            this.socketProcessor.interrupt();
             return false;
         }
     }

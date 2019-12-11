@@ -91,10 +91,11 @@ public class NioReactorGroup extends ThreadPoolExecutor implements ExecutorServi
             } else if (!isShutdown()) {
                 if (task.add(kSocket)) {
                     break;
-                }else {
-                    super.getQueue().remove(task);
-                    task.cancel(false);
                 }
+//                else {
+//                    remove(task);
+//                    task.cancel(false);
+//                }
 
             } else {
                 System.out.println("系统已关闭——————");
