@@ -4,6 +4,9 @@
  */
 package com.kwxyzk.message;
 
+import javafx.scene.shape.ArcTo;
+
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -20,6 +23,8 @@ public class BlockQueueIntPointer {
 
     private int capacity = 0;
 
+    private static AtomicInteger integer = new AtomicInteger();
+
     private Lock lock = new ReentrantLock();
 
     public BlockQueueIntPointer(int capacity) {
@@ -28,6 +33,7 @@ public class BlockQueueIntPointer {
     }
 
     public int poll(){
+        System.out.println("使用剩余"+integer.incrementAndGet());
         lock.lock();
         int i = doPoll();
         lock.unlock();
@@ -53,6 +59,7 @@ public class BlockQueueIntPointer {
     }
 
     public boolean add(int element) {
+        System.out.println("退还剩余"+integer.decrementAndGet());
         lock.lock();
         boolean b = doAdd(element);
         lock.unlock();

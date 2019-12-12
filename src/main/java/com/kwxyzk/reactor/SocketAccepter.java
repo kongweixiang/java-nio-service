@@ -4,7 +4,6 @@
  */
 package com.kwxyzk.reactor;
 
-import com.kwxyzk.Exception.ServiceException;
 import com.kwxyzk.context.KSocket;
 
 import java.io.IOException;

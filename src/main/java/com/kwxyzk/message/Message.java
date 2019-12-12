@@ -4,9 +4,11 @@
  */
 package com.kwxyzk.message;
 
+import com.kwxyzk.Exception.ServiceException;
 import lombok.Builder;
 import lombok.Data;
 
+import javax.sql.rowset.serial.SerialException;
 import java.nio.ByteBuffer;
 
 /**
@@ -81,16 +83,18 @@ public class Message {
 
     public void writePartialMessageToMessage(Message message, int endIndex) {
         int startIndexPartialMessage = message.getOffset() + endIndex;
-        int lengthOfPartialMessage = (message.offset + message.length) - endIndex;
+        int lengthOfPartialMessage = (message.getOffset() + message.getLength()) - endIndex;
         if (lengthOfPartialMessage < 0) {
-            System.out.println("wwwwww");
+            System.out.println("失败");
+            throw new ServiceException();
         }
-        System.arraycopy(message.getShareArray(), startIndexPartialMessage, this.shareArray, this.offset, lengthOfPartialMessage);
+        if (lengthOfPartialMessage > 0) {
+            System.arraycopy(message.getShareArray(), startIndexPartialMessage, this.shareArray, this.offset, lengthOfPartialMessage);
+        }
     }
 
 
     public void clear() {
-        this.shareArray = null; //加快垃圾回收
         messageBuffer.clearMessage(this);
     }
 }

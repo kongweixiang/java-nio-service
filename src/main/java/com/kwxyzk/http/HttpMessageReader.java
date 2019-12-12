@@ -11,7 +11,6 @@ import com.kwxyzk.message.MessageBuffer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -35,16 +34,20 @@ public class HttpMessageReader implements IMessageReader {
         byteBuffer.clear();
         byteBuffer.rewind();
         int read = socket.read(byteBuffer);
-        byteBuffer.flip();
-        this.nextMessage.writeToMessage(byteBuffer);
+        if(read>0){
+            byteBuffer.flip();
+            this.nextMessage.writeToMessage(byteBuffer);
+        }
 
         int endIndex = HttpUtil.parseHttpRequest(this.nextMessage.getShareArray(), this.nextMessage.getOffset(), this.nextMessage.getOffset() + this.nextMessage.getLength(), (HttpHeaders) this.nextMessage.metaData);
-        if(endIndex != -1){
+        if (endIndex != -1) {
             Message message = this.messageBuffer.allocateMessage();
             message.setMetaData(new HttpHeaders());
-
             message.writePartialMessageToMessage(nextMessage, endIndex);
-
+            int lengthOfPartialMessage = (message.getOffset() + message.getLength()) - endIndex;
+            if (lengthOfPartialMessage > 0) {
+                nextMessage.setLength(nextMessage.getLength() - (nextMessage.getOffset() + nextMessage.getLength() - endIndex));
+            }
             completeMessages.add(nextMessage);
             nextMessage = message;
         }
@@ -57,9 +60,9 @@ public class HttpMessageReader implements IMessageReader {
 
     @Override
     public void close() {
-        for (Message message : completeMessages) {
-            message.clear();
-        }
+//        for (Message message : completeMessages) {
+//            message.clear();
+//        }
         this.nextMessage.clear();
         this.completeMessages.clear();
     }

@@ -19,5 +19,12 @@ public class WorkContext {
      */
     public static int socketProcessNum = 10;
 
+    public static int KB = 1024;
+    public static int MB = 1024 * KB;
+
+    private static final int CAPACITY_SMALL  =   4  * KB;
+    private static final int CAPACITY_MEDIUM = 128  * KB;
+    private static final int CAPACITY_LARGE  = 1024 * KB;
+
 
 }

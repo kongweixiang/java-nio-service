@@ -5,7 +5,6 @@
 package com.kwxyzk.reactor;
 
 import com.kwxyzk.context.KSocket;
-
 import java.io.IOException;
 import java.util.concurrent.*;
 
@@ -63,6 +62,7 @@ public class NioReactorGroup extends ThreadPoolExecutor implements ExecutorServi
     }
 
     public void addEvent(KSocket kSocket) throws IOException {
+        System.out.println("总任务："+this.getTaskCount()+" 已完成："+this.getCompletedTaskCount());
         while (true) {
             IOFuture task = taskPointer.poll();
             if (task == null) {
@@ -77,10 +77,7 @@ public class NioReactorGroup extends ThreadPoolExecutor implements ExecutorServi
                         if (task.isCancelled() || !task.add(kSocket)) {
                             continue;
                         }
-                        if (getPoolSize() < getCorePoolSize()) {
-                            prestartCoreThread();
-                            execute(task);
-                        } else if (getPoolSize() <= getMaximumPoolSize()) {
+                        if (getPoolSize() <= getMaximumPoolSize()) {
                             execute(task);
                         } else {
                             super.getQueue().add(task);
@@ -120,6 +117,21 @@ public class NioReactorGroup extends ThreadPoolExecutor implements ExecutorServi
             }
         }
     }
+    @Override
+    protected void beforeExecute(Thread t, Runnable r) {
+        System.out.println("task run");
+        if (r instanceof IOFuture) {
+            IOFuture ioFuture = (IOFuture) r;
+            System.out.println(ioFuture.getName());
+        }
+    }
 
+    protected void afterExecute(Runnable r, Throwable t) {
+        System.out.println("task end");
+        if (r instanceof IOFuture) {
+            IOFuture ioFuture = (IOFuture) r;
+            System.out.println(ioFuture.getName());
+        }
+    }
 
 }

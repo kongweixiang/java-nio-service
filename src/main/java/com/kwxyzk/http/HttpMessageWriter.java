@@ -39,8 +39,8 @@ public class HttpMessageWriter implements IMessageWriter {
                 "Content-Length: 38\r\n" +
                 "Content-Type: text/html\r\n" +
                 "\r\n" +
-                "<html><body> " +new String(bytes,0,bytes.length)+
-                "</body></html>";
+//                "<html><body> " + new String(bytes,0,bytes.length)+
+                "<html><body> Hello World! </body></html>";
         byteBuffer.clear();
         byteBuffer.rewind();
         byteBuffer.put(httpResponse.getBytes("utf-8"));

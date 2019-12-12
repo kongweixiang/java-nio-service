@@ -22,7 +22,7 @@ public class BlockQueueIntPointerTest {
         pointer.add(10);
         pointer.add(10);
         pointer.add(10);
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             if (!pointer.add(10)) {
                 System.out.println("写入失败");
                 break;

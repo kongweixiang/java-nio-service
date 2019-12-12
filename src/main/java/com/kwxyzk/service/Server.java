@@ -18,8 +18,8 @@ import com.kwxyzk.write.WriteHandle;
 public class Server {
 
     public static void main(String[] args) {
-        NioReactorGroup boss = new NioReactorGroup(5,10,"nio-boss");
-        NioReactorGroup work = new NioReactorGroup(20,100,"nio-work");
+        NioReactorGroup boss = new NioReactorGroup(2,5,"nio-boss");
+        NioReactorGroup work = new NioReactorGroup(5,10,"nio-work");
         ReadProcessor readProcessor = new ReadProcessor();
         readProcessor.addHandle(new HttpProcessorHandle());
         WriteProcessor writeProcessor = new WriteProcessor();

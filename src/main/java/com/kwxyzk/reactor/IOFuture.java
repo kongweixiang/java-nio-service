@@ -23,19 +23,37 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class IOFuture<V> extends FutureTask<V> {
     private Selector selector;
     private AtomicInteger count = new AtomicInteger(0);
+    private static AtomicInteger num = new AtomicInteger(0);
     private BlockingDeque<IOFuture> taskPointer;
     private SocketProcessor socketProcessor;
+    private String name = "任务-";
 
     public IOFuture(SocketProcessor socketProcessor, V result, BlockingDeque<IOFuture> taskPointer) {
         super(socketProcessor, result);
         this.taskPointer = taskPointer;
         this.selector = socketProcessor.getSelector();
+        this.name = this.setName();
+        try {
+            taskPointer.put(this);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
+
+    private String setName() {
+        return this.name+num.incrementAndGet();
+    }
+
+    public String getName() {
+        return name;
+    }
+
     public IOFuture(SocketProcessor socketProcessor, BlockingDeque<IOFuture> taskPointer) {
         super( Executors.callable(socketProcessor, null));
         this.taskPointer = taskPointer;
         this.selector = socketProcessor.getSelector();
         this.socketProcessor = socketProcessor;
+        this.name = this.setName();
         try {
             taskPointer.put(this);
         } catch (InterruptedException e) {
@@ -44,7 +62,7 @@ public class IOFuture<V> extends FutureTask<V> {
     }
 
     public boolean add(KSocket t){
-        if (this.socketProcessor == null || this.socketProcessor.isInterrupted()) {
+        if (this.isCancelled() || this.socketProcessor == null || this.socketProcessor.isInterrupted()) {
             this.cancel(false);
             return false;
         }
