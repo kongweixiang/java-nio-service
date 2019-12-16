@@ -10,6 +10,7 @@ import lombok.Data;
 
 import javax.sql.rowset.serial.SerialException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author kongweixiang
@@ -26,6 +27,7 @@ public class Message {
     private int offset = 0;
     private int length = 0;
     public Object metaData    = null;
+    public volatile AtomicBoolean isClose = new AtomicBoolean(false);
 
     public Message() {
     }
@@ -95,6 +97,8 @@ public class Message {
 
 
     public void clear() {
-        messageBuffer.clearMessage(this);
+        if (isClose.compareAndSet(false, true)) {
+            messageBuffer.clearMessage(this);
+        }
     }
 }

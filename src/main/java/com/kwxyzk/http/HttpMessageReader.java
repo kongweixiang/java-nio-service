@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author kongweixiang
@@ -23,6 +24,7 @@ public class HttpMessageReader implements IMessageReader {
     private List<Message> completeMessages = new CopyOnWriteArrayList<Message>();
     private MessageBuffer messageBuffer;
     private volatile Message nextMessage;
+    private volatile AtomicBoolean closeStatus = new AtomicBoolean(false);
 
     public void init(MessageBuffer messageBuffer) {
         this.messageBuffer = messageBuffer;
@@ -63,7 +65,10 @@ public class HttpMessageReader implements IMessageReader {
 //        for (Message message : completeMessages) {
 //            message.clear();
 //        }
-        this.nextMessage.clear();
-        this.completeMessages.clear();
+        if(closeStatus.compareAndSet(false,true)){
+            this.nextMessage.clear();
+            this.completeMessages.stream().forEach(e -> e.clear());
+            this.completeMessages.clear();
+        }
     }
 }

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author kongweixiang
@@ -20,6 +21,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class HttpMessageWriter implements IMessageWriter {
 
     private List<Message> responseMessages = new CopyOnWriteArrayList<>();
+
+    private volatile AtomicBoolean closeStatus = new AtomicBoolean(false);
 
     @Override
     public int write(String message, KSocket socket) throws IOException {
@@ -60,9 +63,11 @@ public class HttpMessageWriter implements IMessageWriter {
 
     @Override
     public void close() {
-        for (Message message : responseMessages) {
-            message.clear();
+        if (closeStatus.compareAndSet(false, true)) {
+            for (Message message : responseMessages) {
+                message.clear();
+            }
+            this.responseMessages.clear();
         }
-        this.responseMessages.clear();
     }
 }

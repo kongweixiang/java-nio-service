@@ -127,9 +127,10 @@ public class NioReactorGroup extends ThreadPoolExecutor implements ExecutorServi
     }
 
     protected void afterExecute(Runnable r, Throwable t) {
-        System.out.println("task end");
+        System.out.println("task end"+r+t);
         if (r instanceof IOFuture) {
             IOFuture ioFuture = (IOFuture) r;
+            ioFuture.close();
             System.out.println(ioFuture.getName());
         }
     }

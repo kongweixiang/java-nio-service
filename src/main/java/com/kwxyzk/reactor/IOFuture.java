@@ -10,7 +10,9 @@ import com.kwxyzk.context.WorkContext;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.List;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,7 +29,7 @@ public class IOFuture<V> extends FutureTask<V> {
     private BlockingDeque<IOFuture> taskPointer;
     private SocketProcessor socketProcessor;
     private String name = "任务-";
-
+    private List<Integer> messagePoint = new CopyOnWriteArrayList<>();
     public IOFuture(SocketProcessor socketProcessor, V result, BlockingDeque<IOFuture> taskPointer) {
         super(socketProcessor, result);
         this.taskPointer = taskPointer;
@@ -54,6 +56,7 @@ public class IOFuture<V> extends FutureTask<V> {
         this.selector = socketProcessor.getSelector();
         this.socketProcessor = socketProcessor;
         this.name = this.setName();
+        socketProcessor.setMessagePoint(this.messagePoint);
         try {
             taskPointer.put(this);
         } catch (InterruptedException e) {
@@ -83,5 +86,9 @@ public class IOFuture<V> extends FutureTask<V> {
             this.socketProcessor.interrupt();
             return false;
         }
+    }
+
+    public void close() {
+        this.socketProcessor.close();
     }
 }

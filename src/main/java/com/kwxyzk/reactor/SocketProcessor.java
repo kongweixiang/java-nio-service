@@ -6,6 +6,7 @@ package com.kwxyzk.reactor;
 
 import com.kwxyzk.context.KSocket;
 import com.kwxyzk.message.Message;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -13,6 +14,7 @@ import java.nio.channels.Selector;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author kongweixiang
@@ -26,6 +28,16 @@ public class SocketProcessor implements Runnable{
     private Selector writerSelector   = null;
     private boolean isInterrupted =false;
     private int timeout = 0;
+    private List<Integer> messagePoint = new CopyOnWriteArrayList<>();
+
+
+    public List<Integer> getMessagePoint() {
+        return messagePoint;
+    }
+
+    public void setMessagePoint(List<Integer> messagePoint) {
+        this.messagePoint = messagePoint;
+    }
 
     public void interrupt() {
         this.isInterrupted = true;
@@ -77,6 +89,16 @@ public class SocketProcessor implements Runnable{
                 }
                 if (isEmpty && (isInterrupted || Thread.currentThread().isInterrupted())) {
                     System.out.println(Thread.currentThread().getName() + "线程开始中断");
+                    Set<SelectionKey> keys = this.readSelector.keys();
+                    keys.stream().forEach(e->{
+                        KSocket socket = (KSocket) e.attachment();
+                        socket.getMessageReader().close();
+                    });
+                    keys = this.readSelector.keys();
+                    keys.stream().forEach(e->{
+                        KSocket socket = (KSocket) e.attachment();
+                        socket.getMessageWriter().close();
+                    });
                     try {
                         this.readSelector.close();
                         this.writerSelector.close();
@@ -187,5 +209,9 @@ public class SocketProcessor implements Runnable{
             selectionKey.channel().close();
             socket.getMessageReader().close();
         }
+    }
+
+    public void close() {
+        messagePoint.clear();
     }
 }
